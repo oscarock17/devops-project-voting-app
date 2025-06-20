@@ -273,6 +273,6 @@ main().catch((error) => {
 });
 
 // Iniciar servidor de métricas
-app.listen(port, () => {
-  console.log(`Worker metrics server listening at http://0.0.0.0:${port}`);
-});
+//app.listen(port, () => {
+  //console.log(`Worker metrics server listening at http://0.0.0.0:${port}`);
+//});
