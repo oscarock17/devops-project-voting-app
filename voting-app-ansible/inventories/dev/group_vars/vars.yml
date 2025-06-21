@@ -1,0 +1,9 @@
+repo_url: "https://github.com/oscarock17/devops-project-voting-app"
+app_dir: "/home/vagrant/app"
+venv_path: "/home/vagrant/venv-voting"
+app_user: vagrant
+db_host: localhost
+db_user: postgres
+db_password: postgres
+db_name: votes
+redis_host: localhost

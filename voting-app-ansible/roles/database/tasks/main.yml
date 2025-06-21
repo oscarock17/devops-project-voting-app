@@ -1,0 +1,28 @@
+---
+# tasks file for database
+
+- name: Instalar PostgreSQL
+  apt:
+    name: postgresql
+    state: present
+    update_cache: true
+
+- name: Establecer contraseña para el usuario postgres
+  shell: sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+
+- name: Crear base de datos 'votes' si no existe
+  shell: |
+    sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = 'votes'" | grep -q 1 || \
+    sudo -u postgres psql -c "CREATE DATABASE votes;"
+
+- name: Crear tabla 'votes' si no existe
+  shell: |
+    sudo -u postgres psql -d votes -c "
+    CREATE TABLE IF NOT EXISTS votes (
+      id VARCHAR(128) PRIMARY KEY,
+      vote VARCHAR NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );"
+
+- name: Conceder privilegios al usuario postgres
+  shell: sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE votes TO postgres;"

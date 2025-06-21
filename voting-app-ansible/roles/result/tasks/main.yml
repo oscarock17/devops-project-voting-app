@@ -1,0 +1,22 @@
+---
+# tasks file for result
+- name: Instalar dependencias del resultado (Node.js)
+  npm:
+    path: "{{ app_dir }}/roxs-voting-app/result"
+
+- name: Crear archivo de servicio systemd para result
+  template:
+    src: result.service.j2
+    dest: /etc/systemd/system/result.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Recargar systemd para aplicar cambios de result.service
+  command: systemctl daemon-reload
+
+- name: Habilitar y arrancar el servicio result
+  systemd:
+    name: result
+    enabled: yes
+    state: started

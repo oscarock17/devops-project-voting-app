@@ -1,0 +1,17 @@
+[Unit]
+Description=Result App (Node.js)
+After=network.target
+
+[Service]
+User={{ app_user }}
+WorkingDirectory={{ app_dir }}/roxs-voting-app/result
+ExecStart=/usr/bin/node main.js
+Restart=always
+Environment=APP_PORT=3000
+Environment=DATABASE_HOST={{ db_host }}
+Environment=DATABASE_NAME={{ db_name }}
+Environment=DATABASE_USER={{ db_user }}
+Environment=DATABASE_PASSWORD={{ db_password }}
+
+[Install]
+WantedBy=multi-user.target

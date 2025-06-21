@@ -1,0 +1,19 @@
+[Unit]
+Description=Voting App (Flask)
+After=network.target
+
+[Service]
+User={{ app_user }}
+WorkingDirectory={{ app_dir }}/roxs-voting-app/vote
+ExecStart={{ venv_path }}/bin/flask run
+Restart=always
+Environment=FLASK_APP=app.py
+Environment=FLASK_RUN_HOST=0.0.0.0
+Environment=FLASK_RUN_PORT=5000
+Environment=DATABASE_HOST={{ db_host }}
+Environment=DATABASE_USER={{ db_user }}
+Environment=DATABASE_PASSWORD={{ db_password }}
+Environment=DATABASE_NAME={{ db_name }}
+
+[Install]
+WantedBy=multi-user.target

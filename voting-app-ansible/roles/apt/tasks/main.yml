@@ -1,0 +1,18 @@
+---
+# tasks file for apt
+
+- name: Asegurar que los paquetes base estén instalados
+  apt:
+    name:
+      - git
+      - curl
+      - build-essential
+    update_cache: true
+    state: present
+
+- name: Instalar Node.js 18.x desde NodeSource (script)
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    apt-get install -y nodejs
+  args:
+    executable: /bin/bash

@@ -1,0 +1,8 @@
+---
+# tasks file for app
+- name: Clonar repositorio de la app
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: voting-app-ansible
+    force: yes

@@ -1,0 +1,8 @@
+---
+# tasks file for redis
+
+- name: Asegurar que Redis esté instalado
+  apt:
+    name: redis-server
+    state: present
+    update_cache: true

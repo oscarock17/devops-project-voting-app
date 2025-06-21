@@ -1,0 +1,18 @@
+[Unit]
+Description=Worker App (Node.js)
+After=network.target
+
+[Service]
+User={{ app_user }}
+WorkingDirectory={{ app_dir }}/roxs-voting-app/worker
+ExecStart=/usr/bin/node main.js
+Restart=always
+Environment=DATABASE_HOST={{ db_host }}
+Environment=DATABASE_USER={{ db_user }}
+Environment=DATABASE_PASSWORD={{ db_password }}
+Environment=DATABASE_NAME={{ db_name }}
+Environment=REDIS_HOST={{ redis_host }}
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
