@@ -26,6 +26,19 @@ services:
       - redis
     networks:
       - app-network
+    
+  result:
+    build:
+      context: ./result
+      dockerfile: docker/Dockerfile
+    container_name: result_app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_USER=postgres
+    networks:
+      - app-network
 
   database:
     image: postgres:15
