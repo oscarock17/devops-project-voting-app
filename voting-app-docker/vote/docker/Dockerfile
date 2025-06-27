@@ -5,7 +5,8 @@ RUN apk update && \
     apk add --no-cache \
     build-base \
     postgresql-dev \
-    gcc
+    gcc  \
+    curl
   
 # Establecer el directorio de trabajo
 WORKDIR /app

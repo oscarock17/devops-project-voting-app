@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+# Paquetes necesarios
+RUN apk update && apk add --no-cache
+
 # Establecer el directorio de trabajo
 WORKDIR /app
 
