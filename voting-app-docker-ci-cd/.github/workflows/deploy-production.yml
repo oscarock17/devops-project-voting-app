@@ -1,0 +1,73 @@
+name: Deploy to Production
+description: Deploys the application to the production environment.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'voting-app-docker-ci-cd/**'
+      - '.github/workflows/deploy-production.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, master]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraer metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker Vote (app flask)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/vote
+          file: ./voting-app-docker-ci-cd/vote/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build Docker Result (app nodejs)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/result
+          file: ./voting-app-docker-ci-cd/result/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build Docker Worker (app nodejs)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/worker
+          file: ./voting-app-docker-ci-cd/worker/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Detener contenedores antiguos
+        run: |
+          docker-compose -f ./docker-compose.production.yml down
+
+      - name: Deploy to Production
+        run: |
+          docker-compose -f ./docker-compose.production.yml up -d --build
