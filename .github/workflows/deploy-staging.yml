@@ -65,11 +65,11 @@ jobs:
 
       - name: Detener contenedores antiguos
         run: |
-          docker-compose -f ./docker-compose.staging.yml down
+          docker-compose -f ./voting-app-docker-ci-cd/docker-compose.staging.yml down
 
       - name: Deploy to Staging
         run: |
-          docker-compose -f ./docker-compose.staging.yml up -d --build
+          docker-compose -f ./voting-app-docker-ci-cd/docker-compose.staging.yml up -d --build
 
       - name: Health Check
         run: |
