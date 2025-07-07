@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/vote
-          file: docker/Dockerfile
+          file: ./voting-app-docker-ci-cd/vote/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/result
-          file: docker/Dockerfile
+          file: ./voting-app-docker-ci-cd/result/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/worker
-          file: docker/Dockerfile
+          file: ./voting-app-docker-ci-cd/worker/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
