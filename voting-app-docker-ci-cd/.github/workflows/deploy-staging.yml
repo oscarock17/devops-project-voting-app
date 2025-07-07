@@ -1,5 +1,5 @@
 name: Deploy to Staging
-description: Deploys the application to the staging environment.
+description: Deploys the application to the staging environment..
 
 on:
   push:
@@ -80,3 +80,4 @@ jobs:
           curl -f http://localhost:3000/healthz || exit 1
           echo "Check app Worker"
           pgrep -f main.js || exit 1
+
