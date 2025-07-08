@@ -15,7 +15,9 @@ env:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, master]
+    runs-on: [self-hosted, production]
+    environment:
+      name: production
 
     steps:
       - name: Checkout Code
@@ -41,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/vote
-          file: ./voting-app-docker-ci-cd/vote/Dockerfile
+          file: ./voting-app-docker-ci-cd/vote/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -50,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/result
-          file: ./voting-app-docker-ci-cd/result/Dockerfile
+          file: ./voting-app-docker-ci-cd/result/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -59,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./voting-app-docker-ci-cd/worker
-          file: ./voting-app-docker-ci-cd/worker/Dockerfile
+          file: ./voting-app-docker-ci-cd/worker/docker/Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -76,12 +78,12 @@ jobs:
       - name: Detener contenedores antiguos
         run: |
           cd voting-app-docker-ci-cd
-          docker compose --env-file .env -f docker-compose.staging.yml down
+          docker compose --env-file .env -f docker-compose.production.yml down
 
-      - name: Deploy to Staging
+      - name: Deploy to Prodcution
         run: |
           cd voting-app-docker-ci-cd
-          docker compose --env-file .env -f docker-compose.staging.yml up -d --build
+          docker compose --env-file .env -f docker-compose.production.yml up -d --build
 
       - name: Health Check
         run: |
@@ -92,3 +94,6 @@ jobs:
           curl -f http://localhost:3000/healthz || exit 1
           echo "Check app Worker"
           pgrep -f main.js || exit 1
+
+      - name: Notificación exitosa
+        run: echo "✅ Deployment a producción completado correctamente."
