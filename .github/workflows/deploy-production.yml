@@ -64,15 +64,24 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Crear archivo .env desde Secrets
+        run: |
+          cd voting-app-docker-ci-cd
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+
       - name: Detener contenedores antiguos
         run: |
           cd voting-app-docker-ci-cd
-          docker-compose -f docker-compose.staging.yml down
+          docker-compose --env-file .env -f docker-compose.staging.yml down
 
       - name: Deploy to Staging
         run: |
           cd voting-app-docker-ci-cd
-          docker-compose -f docker-compose.staging.yml up -d --build
+          docker-compose --env-file .env -f docker-compose.staging.yml up -d --build
 
       - name: Health Check
         run: |
