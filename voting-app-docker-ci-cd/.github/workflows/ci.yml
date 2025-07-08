@@ -1,0 +1,56 @@
+name: CI - Run tests on develop
+description: Run tests
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'voting-app-docker-ci-cd/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+
+
+jobs:
+  test:
+    runs-on: [self-hosted, develop]
+
+    steps:
+      - name: Checkout Codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          echo "Instalando dependencias"
+          python -m pip install --upgrade pip
+          pip install -r ./voting-app-docker-ci-cd/vote/requirements.txt
+
+      - name: Ejecutar Test Vote (app flask)
+        run: |
+          echo "Ejecutando pruebas de la app Flask"
+          pytest ./voting-app-docker-ci-cd/vote/tests
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: |
+          echo "Instalando dependencias"
+          cd ./voting-app-docker-ci-cd/result && npm install
+          cd ../worker && npm install
+
+      - name: Ejecutar Test Result (app nodejs)
+        run: |
+          echo "Ejecutando pruebas de la app Result Node.js"
+          cd ./voting-app-docker-ci-cd/result && npm test
+
+      - name: Ejecutar Test Worker (app nodejs)
+        run: |
+          echo "Ejecutando pruebas del Worker Node.js"
+          cd ./voting-app-docker-ci-cd/worker && npm test

@@ -1,0 +1,99 @@
+name: Deploy to Production
+description: Deploys the application to the production environment.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'voting-app-docker-ci-cd/**'
+      - '.github/workflows/deploy-production.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, production]
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraer metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker Vote (app flask)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/vote
+          file: ./voting-app-docker-ci-cd/vote/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build Docker Result (app nodejs)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/result
+          file: ./voting-app-docker-ci-cd/result/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build Docker Worker (app nodejs)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./voting-app-docker-ci-cd/worker
+          file: ./voting-app-docker-ci-cd/worker/Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Crear archivo .env desde Secrets
+        run: |
+          cd voting-app-docker-ci-cd
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+
+      - name: Detener contenedores antiguos
+        run: |
+          cd voting-app-docker-ci-cd
+          docker compose --env-file .env -f docker-compose.production.yml down
+
+      - name: Deploy to Prodcution
+        run: |
+          cd voting-app-docker-ci-cd
+          docker compose --env-file .env -f docker-compose.production.yml up -d --build
+
+      - name: Health Check
+        run: |
+          sleep 10
+          echo "Check app Flask"
+          curl -f http://localhost/healthz || exit 1
+          echo "Check app Node.js"
+          curl -f http://localhost:3000/healthz || exit 1
+          echo "Check app Worker"
+          pgrep -f main.js || exit 1
+
+      - name: Notificación exitosa
+        run: echo "✅ Deployment a producción completado correctamente."
