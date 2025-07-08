@@ -65,17 +65,19 @@ jobs:
 
       - name: Detener contenedores antiguos
         run: |
-          docker-compose -f ./voting-app-docker-ci-cd/docker-compose.staging.yml down
+          cd voting-app-docker-ci-cd
+          docker-compose -f docker-compose.staging.yml down
 
       - name: Deploy to Staging
         run: |
-          docker-compose -f ./voting-app-docker-ci-cd/docker-compose.staging.yml up -d --build
+          cd voting-app-docker-ci-cd
+          docker-compose -f docker-compose.staging.yml up -d --build
 
       - name: Health Check
         run: |
           sleep 10
           echo "Check app Flask"
-          curl -f http://localhost:5000/healthz || exit 1
+          curl -f http://localhost/healthz || exit 1
           echo "Check app Node.js"
           curl -f http://localhost:3000/healthz || exit 1
           echo "Check app Worker"
