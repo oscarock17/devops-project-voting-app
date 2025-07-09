@@ -12,7 +12,7 @@ jobs:
       - name: Estado de salud del servicio Vote (app flask)
         run: |
           echo "Check app Flask"
-          curl -f http://localhost:5000/healthz || exit 1
+          curl -f http://localhost/healthz || exit 1
 
       - name: Estado de salud del servicio Result (app nodejs)
         run: |
